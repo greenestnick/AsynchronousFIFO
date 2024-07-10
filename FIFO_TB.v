@@ -15,7 +15,18 @@ module FIFO_TB();
 
 	reg [2:0] lastRPtr = 3'b0;
 
-	
+
+	task PrintFIFO ();
+	begin
+
+		$write("\t\t\t\t\t\t %t: [ ", $time);
+		for(integer i = 0; i < 8; i = i + 1) $write("%d", fifo.mem.memArray[i]);
+		$write(" ] R: %d W: %d", fifo.rCounterBinary, fifo.wCounterBinary);
+		$write("\n");
+		
+	end
+	endtask
+
 
 	initial begin
 		wclk = 1'b0;
@@ -31,7 +42,7 @@ module FIFO_TB();
 		$display("=== RESET AND STARTING ===");	
 		wen = 1'b1;
 		ren = 1'b1;
-		$monitor("Full:%b Empty:%b", full, empty);
+		$monitor("%3t: Full:%b Empty:%b", $time, full, empty);
 	end
 	
 	//Write with a clock period of 6
@@ -40,7 +51,8 @@ module FIFO_TB();
 		repeat (`NUM) begin
 			w_word = w_word + 1;
 			$display("%t: Writing: %d", $time, w_word);
-
+			
+			PrintFIFO();
 			repeat(2) #3 wclk = ~wclk;
 		end
 	end
@@ -53,6 +65,7 @@ module FIFO_TB();
 			lastRPtr = fifo.rCounterBinary[2:0];
 			repeat (2) #6 rclk = ~rclk;
 			$display("\t\t\t%t:Reading: %d", $time, r_word);
+			PrintFIFO();
 		end
 
 		
